@@ -84,14 +84,20 @@ const Question: React.FC<QuestionComp> = ({ index, removeQuestionHandler, questi
     }
 
     if (type === "text") {
-      return <TextLimit questionNo={questionNo} />;
+      return (
+        <>
+          <TextLimit questionNo={questionNo} />
+          <br />
+        </>
+      );
     }
 
     if (type === "scale") {
       return (
         <>
           <ScaleLength questionNo={questionNo} />
-          <ScaleLegend questionNo={questionNo} />;
+          <br />
+          <ScaleLegend questionNo={questionNo} />
           <br />
         </>
       );

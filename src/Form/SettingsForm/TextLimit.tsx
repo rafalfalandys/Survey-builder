@@ -4,7 +4,7 @@ type TextLimitType = {
 };
 
 const TextLimit: React.FC<TextLimitType> = ({ questionNo, answerNo }) => {
-  const answerNumber = answerNo ? `-${answerNo}` : "";
+  const answerNumber = answerNo || answerNo === 0 ? `-${answerNo}` : "";
   const limitId = `${questionNo}${answerNumber}--limit`;
 
   return (

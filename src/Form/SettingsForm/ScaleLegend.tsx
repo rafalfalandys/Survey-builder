@@ -1,6 +1,6 @@
 const ScaleLegend: React.FC<{ questionNo: number }> = ({ questionNo }) => {
-  const legendMinId = `${questionNo}--legend-min`;
-  const legendMaxId = `${questionNo}--legend-max`;
+  const legendMinId = `${questionNo}--legendMin`;
+  const legendMaxId = `${questionNo}--legendMax`;
 
   return (
     <>

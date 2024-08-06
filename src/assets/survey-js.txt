@@ -1,0 +1,699 @@
+"use strict";
+(function () {
+  ////////////////////////////////////////////
+  ////////////////// config //////////////////
+  ////////////////////////////////////////////
+  // prettier-ignore
+  const QUESTIONS = **configQuestions**;
+  // prettier-ignore
+  const IMAGES_CONFIG = ['😩', '😔', '🙁', '🙂', '😄', '🤩'];
+  const QUESTIONS_PER_PAGE =
+    +`#### type: "number", id: "questions__per-page", label: "Questions per page", groupName: "General settings", groupId: "settings-general", defaultValue: "3", description: "This setting controls how many questions are displayed on each page of the survey." !####`;
+  // DEV - vscode vs synerise viariables fix:
+  const questionsPerPage = !isNaN(QUESTIONS_PER_PAGE) ? QUESTIONS_PER_PAGE : 1;
+  const DEFAULT_LIMIT = 100;
+  const IS_SHUFFLED = `#### type: "switch", id: "questions__shuffle", defaultValue: false, label: "Shuffle questions", description: "Randomly shuffles questions array", groupName: "General settings", groupId: "settings-general" !####`;
+  const SURVEY_NAME = `#### type: "string", id: "survey__name", label: "Survey name", groupName: "General settings", groupId: "settings-general", defaultValue: "Customer satisfaction survey", description: "This is the title of your survey. It will be used in events or analytics related to the survey's completion." !####`;
+  const MAIN_EVENT_NAME = `#### type: "string", id: "main-event__name", label: "Main event name/tag", groupName: "General settings", groupId: "settings-general", defaultValue: "survey", description: "Name of the form.submit event tag. In in-apps name of the event sent to Synerise. Needs to be configured in platform events settings." !####`;
+  const TRACK_STEPS =
+    // @ts-ignore
+    `#### type: "switch", id: "track-steps", groupName: "General settings", groupId: "settings-general", defaultValue: false, label: "Track steps" !####` ===
+    "true";
+  const CUSTOM_EVENT_NAME = `#### type: "string", id: "custom-event__name", label: "Custom event name", groupName: "General settings", groupId: "settings-general", defaultValue: "survey.step", description: "OPTIONAL. Name of the event sent to Synerise after each step of a survey. Needs to be configured in platform events settings." !####`;
+  // swipe effect
+  /* {%- if '#### type: "select", id: "display__type", order: 1, options: [{ value: "popup", displayName: "Popup" }, { value: "bottom-right", displayName: "Modal bottom-right" }, { value: "slide", displayName: "Slide-in" }], label: "Display type", defaultValue: "popup", groupName: "General settings", groupId: "settings-general" !####' == 'slide' -%} */
+  const modalEl = document.querySelector(".snrs-modal");
+  modalEl?.classList.add("snrs-modal-slide");
+  setTimeout(() => {
+    modalEl?.classList.remove("snrs-modal-slide");
+  }, 500);
+  /* {%- endif -%} */
+  let questions = QUESTIONS;
+  // @ts-ignore
+  if (IS_SHUFFLED === "true") {
+    const shuffledQuestions = QUESTIONS.map((value) => ({ value, sort: Math.random() }))
+      .sort((a, b) => a.sort - b.sort)
+      .map(({ value }) => value);
+    questions = shuffledQuestions;
+  }
+  ////////////////////////////////////////////
+  ////////////////// helper //////////////////
+  ////////////////////////////////////////////
+  const hide = (el) => el.classList.add("snr-survey__hidden");
+  const show = (el) => el.classList.remove("snr-survey__hidden");
+  ////////////////////////////////////////////
+  ////////////////// logic ///////////////////
+  ////////////////////////////////////////////
+  const state = {
+    totalPages: Math.ceil(QUESTIONS.length / questionsPerPage),
+    currentPage: 1,
+  };
+  ////////////////////////////////////////////
+  ////////////////// view ////////////////////
+  ////////////////////////////////////////////
+  class View {
+    _parentEl;
+    _firstChildEl;
+    _contentEl;
+    _templateEl;
+    _templateReplacementData;
+    constructor(parent, templateId, templateReplacementData) {
+      if (typeof parent === "string") this._parentEl = document.querySelector(parent);
+      else this._parentEl = parent;
+      this._templateEl = document.getElementById(templateId);
+      this._firstChildEl = this._templateEl.firstElementChild?.cloneNode(true);
+      this._templateReplacementData = templateReplacementData;
+      if (templateReplacementData) this._replaceTemplateStrings(this._templateReplacementData);
+      this._contentEl = this._firstChildEl.firstElementChild;
+      this._render();
+    }
+    _replaceTemplateStrings(replaceData) {
+      for (const [key, value] of Object.entries(replaceData)) {
+        const templateStr = '**' + key + '**';
+        if (typeof value === "string" || typeof value === "number") {
+          this._firstChildEl.innerHTML = this._firstChildEl.innerHTML.replaceAll(templateStr, value + "");
+        } else if (typeof value === "object") {
+          this._replaceTemplateStrings(value);
+        }
+      }
+    }
+    _render() {
+      this._parentEl.insertAdjacentElement("beforeend", this._contentEl);
+    }
+    get contentEl() {
+      return this._contentEl;
+    }
+  }
+  class SurveyView extends View {
+    submitBtn;
+    nextBtn;
+    pagesWrapper;
+    visibleQuestions = [];
+    _startBtn;
+    _endBtn;
+    _closeBtnEl;
+    _surveyWrapper;
+    _welcomeScreenEl;
+    _formEl;
+    _finalViewEl;
+    _allQuestionEls = [];
+    _allDotEls = [];
+    _requiredLegendEl = document.querySelector(".snr-survey__required-description");
+    constructor() {
+      super(".snr-survey__main-wrapper", "snr-survey__template");
+      this._closeBtnEl = document.querySelector(".snrs-modal-btn-close");
+      this.submitBtn = this._contentEl.querySelector(".snr-survey__btn-submit");
+      this.nextBtn = this._contentEl.querySelector(".snr-survey__btn-next");
+      HTMLButtonElement;
+      this.pagesWrapper = this._contentEl.querySelector(".snr-survey__dots-container");
+      this._startBtn = this._contentEl.querySelector(".snr-survey__btn-start");
+      this._endBtn = this._contentEl.querySelector(".snr-survey__btn-end");
+      this._surveyWrapper = this._contentEl.querySelector(".snr-survey__survey-wrapper");
+      this._welcomeScreenEl = this._contentEl.querySelector(".snr-survey__welcome-view__wrapper");
+      this._formEl = this._contentEl.querySelector("form");
+      this._finalViewEl = this._contentEl.querySelector(".snr-survey__final-view__wrapper");
+      this._addStartBtnHandler();
+      this._addEndBtnHandler();
+      this._showSurvery();
+      this._mountQuestions();
+      this._setQuestionsPages();
+    }
+    addSubmitHandler(handler) {
+      this._formEl.addEventListener("submit", (e) => {
+        e.preventDefault();
+        handler();
+      });
+    }
+    addCloseBtnHandler(handler) {
+      this._closeBtnEl?.addEventListener("click", () => {
+        handler();
+      });
+    }
+    addEndSurveyHandler(handler) {
+      this._formEl.addEventListener("change", (e) => {
+        if (e.target) handler(e.target);
+      });
+    }
+    markActiveDot(pageNo) {
+      this._allDotEls.forEach((el, i) => {
+        if (i === pageNo - 1) el.classList.add("snr-survey__dot--active");
+        else el.classList.remove("snr-survey__dot--active");
+      });
+    }
+    showSurvey() {
+      hide(this._welcomeScreenEl);
+      show(this._surveyWrapper);
+    }
+    paginate() {
+      hide(this._requiredLegendEl);
+      this.visibleQuestions = [];
+      this._allQuestionEls.forEach((el, i) => {
+        const questionNo = +el.dataset.page;
+        if (questionNo === state.currentPage) {
+          show(el);
+          this.visibleQuestions.push(i + 1);
+          // show required legend if there is any required question on the page
+          if (el.querySelector("[required=true]")) show(this._requiredLegendEl);
+        } else {
+          hide(el);
+        }
+      });
+    }
+    hideSurvey() {
+      hide(this._surveyWrapper);
+    }
+    showFinalView() {
+      show(this._finalViewEl);
+    }
+    addNextPageHandler(handler) {
+      this.nextBtn.addEventListener("click", () => {
+        handler("next");
+      });
+    }
+    checkValidity(currentPage) {
+      const errors = this._allQuestionEls
+        .filter((el) => +el.dataset.page === currentPage)
+        .map((el) => {
+          const inputEls = el.querySelectorAll("input");
+          const textareaEls = el.querySelectorAll("textarea");
+          const selectEls = el.querySelectorAll("select");
+          return [...inputEls, ...textareaEls, ...selectEls];
+        })
+        .flatMap((el) => [...el].map((input) => input.checkValidity()));
+      return errors.includes(false);
+    }
+    skipValidation() {
+      this.submitBtn.setAttribute("formnovalidate", "true");
+    }
+    bringBackValidation() {
+      this.submitBtn.removeAttribute("formnovalidate");
+    }
+    get formData() {
+      const formData = new FormData(this._formEl);
+      return formData;
+    }
+    _setQuestionsPages() {
+      this._allQuestionEls.forEach((el, i) => {
+        el.dataset.page = Math.ceil((i + 1) / questionsPerPage) + "";
+      });
+    }
+    _mountQuestions() {
+      questions.forEach((question, index) => {
+        const questionObj =
+          question.type === "single"
+            ? new QuestionRadioView(question, index + 1)
+            : question.type === "multi"
+            ? new QuestionCheckboxView(question, index + 1)
+            : question.type === "scale"
+            ? new QuestionScaleView(question, index + 1)
+            : question.type === "open"
+            ? new QuestionOpenView(question, index + 1)
+            : question.type === "images"
+            ? new QuestionImagesView(question, index + 1)
+            : null;
+        if (questionObj) this._allQuestionEls.push(questionObj.contentEl);
+        const dotObj = new DotView(index);
+        if (dotObj) this._allDotEls.push(dotObj.contentEl);
+      });
+    }
+    _showSurvery() {
+      this._parentEl.removeAttribute("style");
+    }
+    _addStartBtnHandler() {
+      this._startBtn.addEventListener("click", () => {
+        hide(this._welcomeScreenEl);
+        show(this._surveyWrapper);
+        surveyView.markActiveDot(1);
+      });
+    }
+    _addEndBtnHandler() {
+      this._endBtn.addEventListener("click", () => {
+        document.querySelector(".snrs-modal-wrapper")?.classList.remove("snrs-modal-show");
+      });
+    }
+  }
+  class DotView extends View {
+    constructor(pageIndex) {
+      super(".snr-survey__dots-container", "snr-survey__dot__template", { pageIndex });
+    }
+  }
+  class QuestionView extends View {
+    _question;
+    _questionIndex;
+    _answerEls = [];
+    _answersContainer;
+    _inputEls = [];
+    _customCheckboxEls = [];
+    constructor(templateId, question, questionIndex) {
+      const replaceObj = {
+        question: question.question,
+        limit: "limit" in question ? question.limit : DEFAULT_LIMIT,
+        questionIndex,
+        legendLow: question.type === "scale" || question.type === "images" ? question.legend[0] : undefined,
+        legendHigh: question.type === "scale" || question.type === "images" ? question.legend[1] : undefined,
+      };
+      super(".snr-survey__questions__list", templateId, replaceObj);
+      this._question = question;
+      this._questionIndex = questionIndex;
+      this._answersContainer = this._contentEl.querySelector(".snr-survey__answers__list");
+      new QuestionTextView(
+        this._contentEl,
+        replaceObj,
+        typeof this._question.required === "undefined" ? true : this._question.required
+      );
+    }
+    _addDefultErrorHandler() {
+      this._answerEls.forEach((answerEl) => {
+        const inputEl = answerEl.querySelector("input");
+        inputEl.addEventListener("invalid", this._defultErrorHandler.bind(this, answerEl, inputEl));
+      });
+    }
+    _defultErrorHandler(answerEl, inputEl) {
+      const customCheckboxEl = answerEl.querySelector(".snr-survey__answer__checkbox");
+      const customCheckboxEls = this._contentEl.querySelectorAll(".snr-survey__answer__checkbox");
+      const errorTextEl = this._contentEl.querySelector(".snr-survey__error__text");
+      // 'invalid' event is trigered for each input. Flag all invalid inputs with error class.
+      customCheckboxEl.classList.add("snr-survey__error__input");
+      show(errorTextEl);
+      // fix error after checking an answer
+      inputEl.addEventListener("change", () => {
+        hide(errorTextEl);
+        customCheckboxEls.forEach((el) => el.classList.remove("snr-survey__error__input"));
+      });
+      // move to page
+      if (+this._contentEl.dataset.page < state.currentPage) {
+        state.currentPage = +this._contentEl.dataset.page;
+        surveyView.paginate();
+        controlButtons();
+      }
+    }
+    // change handler used by questions type single, multi and scale
+    _addChangeHandler(handler) {
+      this._inputEls.forEach((el) => {
+        el.addEventListener("change", (e) => {
+          if (e.target) handler(e.target);
+        });
+      });
+    }
+    _addExtraElements(answerObj) {
+      const inputEl = answerObj.contentEl.querySelector("input");
+      const customCheckboxEl = answerObj.contentEl.querySelector(".snr-survey__answer__checkbox");
+      this._answerEls.push(answerObj.contentEl);
+      this._inputEls.push(inputEl);
+      if (customCheckboxEl) this._customCheckboxEls.push(customCheckboxEl);
+    }
+  }
+  class QuestionTextView extends View {
+    constructor(parent, replaceObj, required) {
+      super(parent, "snr-survey__question__text__template", replaceObj);
+      const requiredMarkEl = parent.querySelector(".snr-survey__required-mark");
+      if (!required) requiredMarkEl.remove();
+    }
+    _render() {
+      this._parentEl.insertAdjacentElement("afterbegin", this._contentEl);
+    }
+  }
+  class AnswerView extends View {
+    _inputEl;
+    _required;
+    constructor(parent, templateId, replaceObj, required) {
+      super(parent, templateId, replaceObj);
+      this._inputEl = this._contentEl.querySelector("input");
+      this._required = required;
+      this._setRequired();
+    }
+    _setRequired() {
+      if (this._required) this._inputEl.setAttribute("required", "true");
+      else this._inputEl.removeAttribute("required");
+    }
+  }
+  ////////////////////////////////////////////
+  /////// 0. Question single and multi ///////
+  class QuestionClosed extends QuestionView {
+    constructor(template, question, questionIndex) {
+      super(template, question, questionIndex);
+      this._mountAnswers();
+    }
+    _mountAnswers() {
+      this._question.answers.forEach((answer, answerIndex) => {
+        const replaceObj = {
+          answer: typeof answer === "object" ? answer.answer : answer,
+          questionKey: this._questionIndex,
+          answerKey: answerIndex + 1,
+        };
+        const answerOptions = typeof answer === "object" ? answer.options || undefined : undefined;
+        const answerArgs = [
+          this._answersContainer,
+          { ...replaceObj, answerIndex },
+          typeof this._question.required === "undefined" ? true : this._question.required,
+          answerOptions,
+        ];
+        const answerObj =
+          this._question.type === "single" ? new AnswerRadioView(...answerArgs) : new AnswerCheckboxView(...answerArgs);
+        this._addExtraElements(answerObj);
+      });
+    }
+  }
+  class AnswerClosed extends AnswerView {
+    _customInputWrapper;
+    _customInputEl;
+    _options;
+    constructor(parent, templateId, replaceObj, required, options) {
+      super(
+        parent,
+        templateId,
+        {
+          ...replaceObj,
+          limit: options?.limit,
+          endsSurvey: options && options.endsSurvey ? JSON.stringify(options?.endsSurvey) : "false",
+        },
+        required
+      );
+      this._options = options;
+      this._customInputWrapper = this._contentEl.querySelector(".snr-survey__custom-input__wrapper");
+      this._customInputEl = this._contentEl.querySelector(".snr-survey__custom-input");
+      if (!options?.isOpen) {
+        this._removeCustomInputEl();
+      } else {
+        hide(this._customInputWrapper);
+        this._inputEl.name = this._inputEl.name + "_other";
+        this._mountCounter();
+        this._addCustomInputHandler();
+      }
+    }
+    _addCustomInputHandler() {
+      const inputEl = this._contentEl.querySelector("input");
+      inputEl?.addEventListener("change", (e) => {
+        if (e.target && e.target instanceof HTMLInputElement) {
+          if (e.target.checked) {
+            show(this._customInputWrapper);
+          } else {
+            hide(this._customInputWrapper);
+            this._customInputEl.value = "";
+            // handle change event (counter)
+            const event = new Event("input", { bubbles: true });
+            this._customInputEl.dispatchEvent(event);
+          }
+        }
+      });
+    }
+    _removeCustomInputEl() {
+      this._customInputEl.remove();
+    }
+    _mountCounter() {
+      new CounterView(this._customInputWrapper, this._options?.limit || DEFAULT_LIMIT, this._customInputEl);
+    }
+  }
+  ////////////////////////////////////////////
+  ///////// 1. Question type radio //////////
+  class QuestionRadioView extends QuestionClosed {
+    _question;
+    constructor(question, questionIndex) {
+      super("snr-survey__question__template--single", question, questionIndex);
+      this._question = question;
+      this._addDefultErrorHandler();
+    }
+  }
+  class AnswerRadioView extends AnswerClosed {
+    constructor(parent, replaceObj, required, options) {
+      super(parent, "snr-survey__answer__template--single", { replaceObj }, required, options);
+    }
+  }
+  ////////////////////////////////////////////
+  //////// 2. Question type checkbox /////////
+  class QuestionCheckboxView extends QuestionClosed {
+    _question;
+    constructor(question, questionIndex) {
+      super("snr-survey__question__template--multi", question, questionIndex);
+      this._question = question;
+      this._addDefultErrorHandler();
+      this._addChangeHandler(this._changeHandler.bind(this));
+    }
+    _changeHandler(inputEl) {
+      if (!this._question.required) return;
+      // handle multiple answer error
+      const isValid = this._inputEls.some((el) => el?.checked);
+      if (isValid) this._inputEls.forEach((el) => el?.removeAttribute("required"));
+      else this._inputEls.forEach((el) => el?.setAttribute("required", "true"));
+    }
+  }
+  class AnswerCheckboxView extends AnswerClosed {
+    constructor(parent, replaceObj, required, options) {
+      super(parent, "snr-survey__answer__template--multi", { replaceObj }, required, options);
+    }
+  }
+  ////////////////////////////////////////////
+  ////////// 3. Question type scale //////////
+  class QuestionScaleView extends QuestionView {
+    _question;
+    constructor(question, questionIndex) {
+      super("snr-survey__question--scale__template", question, questionIndex);
+      this._question = question;
+      this._mountAnswers();
+      this._addDefultErrorHandler();
+      this._addChangeHandler(this._changeHandler.bind(this));
+    }
+    _mountAnswers() {
+      const length = this._question.length || 10;
+      for (let i = 0; i < length; i++) {
+        const replaceObj = {
+          questionKey: this._questionIndex,
+          answerKey: i + 1,
+          limit: this._question.length,
+        };
+        const required = typeof this._question.required === "undefined" ? true : this._question.required;
+        const answerObj = new AnswerScaleView(this._answersContainer, replaceObj, required);
+        this._addExtraElements(answerObj);
+      }
+    }
+    _changeHandler(target) {
+      this._inputEls.forEach((_, i) => {
+        if (i < +target.dataset.value) this._customCheckboxEls[i].classList.add("snr-survey__answer--active");
+        else this._customCheckboxEls[i].classList.remove("snr-survey__answer--active");
+      });
+    }
+  }
+  class AnswerScaleView extends AnswerView {
+    constructor(parent, replaceObj, required) {
+      super(parent, "snr-survey__answer__template--scale", replaceObj, required);
+    }
+  }
+  ////////////////////////////////////////////
+  ////////// 4. Question type text ///////////
+  class QuestionOpenView extends QuestionView {
+    _textAreaEl;
+    constructor(question, questionIndex) {
+      super("snr-survey__question--open__template", question, questionIndex);
+      this._textAreaEl = this._contentEl.querySelector(".snr-survey__answer textarea");
+      this._setRequired();
+      this._addErrorHandler();
+      new CounterView(this._contentEl, question.limit || DEFAULT_LIMIT, this._textAreaEl);
+    }
+    _addErrorHandler() {
+      const textEl = this._contentEl.querySelector("textarea");
+      textEl.addEventListener("invalid", (e) => {
+        e.preventDefault();
+        this._errorHandler();
+      });
+    }
+    _errorHandler() {
+      const errorTextEl = this._contentEl.querySelector(".snr-survey__error__text");
+      // 'invalid' event is trigered for each input. Flag all invalid inputs with error class.
+      this._textAreaEl.classList.add("snr-survey__error__input");
+      show(errorTextEl);
+      // fix error after checking an answer
+      this._textAreaEl.addEventListener("input", () => {
+        if (this._textAreaEl.value.trim() !== "") {
+          hide(errorTextEl);
+          this._textAreaEl.classList.remove("snr-survey__error__input");
+        } else {
+          this._textAreaEl.classList.add("snr-survey__error__input");
+          show(errorTextEl);
+        }
+      });
+      // move to page
+      if (+this._contentEl.dataset.page < state.currentPage) {
+        state.currentPage = +this._contentEl.dataset.page;
+        surveyView.paginate();
+        controlButtons();
+      }
+    }
+    _setRequired() {
+      const required = typeof this._question.required === "undefined" ? true : this._question.required;
+      if (!required) this._textAreaEl.removeAttribute("required");
+      else this._textAreaEl.setAttribute("required", "true");
+    }
+  }
+  ////////////////////////////////////////////
+  ///////// 5. Question type images //////////
+  class QuestionImagesView extends QuestionView {
+    _question;
+    constructor(question, questionIndex) {
+      super("snr-survey__question--scale__template", question, questionIndex);
+      this._question = question;
+      this._mountAnswers();
+      this._addDefultErrorHandler();
+    }
+    _mountAnswers() {
+      const length = IMAGES_CONFIG.length;
+      for (let i = 0; i < length; i++) {
+        const replaceObj = {
+          questionKey: this._questionIndex,
+          answerKey: i + 1,
+          limit: length,
+        };
+        const required = typeof this._question.required === "undefined" ? true : this._question.required;
+        const answerObj = new AnswerImagesView(this._answersContainer, replaceObj, required, i);
+        this._addExtraElements(answerObj);
+      }
+    }
+  }
+  class AnswerImagesView extends AnswerView {
+    _imageEl;
+    constructor(parent, replaceObj, required, index) {
+      super(parent, "snr-survey__answer__template--image", replaceObj, required);
+      this._imageEl = this._contentEl.querySelector(".snr-survey__checkbox__img");
+      this._imageEl.innerText = IMAGES_CONFIG[index];
+    }
+  }
+  class CounterView extends View {
+    _inputEl;
+    _counterEl;
+    constructor(parentEl, limit, inputEl) {
+      super(parentEl, "snr-survey__counter__template", { limit });
+      this._inputEl = inputEl;
+      this._counterEl = this._contentEl.querySelector(".snr-survey__counter--value");
+      this.addInputChangeHandler();
+    }
+    addInputChangeHandler() {
+      this._inputEl.addEventListener("input", () => {
+        this._counterEl.textContent = this._inputEl.value.length + "";
+      });
+    }
+  }
+  const surveyView = new SurveyView();
+  //////////////////////////////////////////////
+  ////////////////// control ///////////////////
+  const sendCustomData = () => {
+    const dataObj = {
+      ...buildFormDataObject(surveyView.visibleQuestions),
+      step: state.currentPage,
+      title: 'Step' + state.currentPage,
+    };
+    // @ts-ignore
+    SR.event.trackCustomEvent(CUSTOM_EVENT_NAME, dataObj);
+  };
+  const controlPageChange = (nextOrPrev) => {
+    // check validity of questions on current page and block next page. Allow previous.
+    if (nextOrPrev === "next") {
+      const isInvalid = surveyView.checkValidity(state.currentPage);
+      if (isInvalid) return;
+      if (TRACK_STEPS) sendCustomData();
+      state.currentPage++;
+    }
+    if (nextOrPrev === "prev") state.currentPage--;
+    surveyView.paginate();
+    controlButtons();
+    surveyView.markActiveDot(state.currentPage);
+  };
+  const controlButtons = () => {
+    if (state.totalPages === 1) {
+      // number of pages is 1
+      show(surveyView.submitBtn);
+      hide(surveyView.nextBtn);
+      hide(surveyView.pagesWrapper);
+    } else if (state.totalPages > 1 && state.currentPage === 1) {
+      // number of pages is 2 or more and we are on first page
+      hide(surveyView.submitBtn);
+      show(surveyView.nextBtn);
+    } else if (state.totalPages > 1 && state.currentPage === state.totalPages) {
+      // number of pages is 2 or more and we are on last page
+      show(surveyView.submitBtn);
+      hide(surveyView.nextBtn);
+    } else {
+      // number of pages is 3 or more and we are not on first page and not on last page
+      hide(surveyView.submitBtn);
+      show(surveyView.nextBtn);
+    }
+  };
+  const buildFormDataObject = (curQuestions) => {
+    const dataObj = {
+      surveyName: SURVEY_NAME,
+    };
+    // building data object
+    for (const [inputName, value] of surveyView.formData.entries()) {
+      if (!value || (curQuestions && !curQuestions.some((questionNo) => inputName.includes(questionNo + "")))) continue;
+      // skip custom questions - only send text typed in custom input
+      if (inputName.includes("_other")) continue;
+      const inputEl = document.querySelector('[name="' + inputName + '"]');
+      // helper fn
+      const buildAnswerArray = (answer) => {
+        // multiple values
+        if (dataObj[answer]) {
+          // second+ value
+          dataObj[answer].push(value);
+        } else {
+          // first of multiple values
+          dataObj[answer] = [value];
+        }
+      };
+      // only send 'question: "What if?"' instead of 'question2: "What if?"'
+      if (curQuestions && questionsPerPage === 1) {
+        if (inputName.includes("question")) {
+          dataObj.question = value;
+        } else if (inputEl.type === "checkbox") {
+          buildAnswerArray("answer");
+        } else {
+          dataObj.answer = value;
+        }
+        continue;
+      }
+      if (inputEl.type === "checkbox") {
+        buildAnswerArray(inputName);
+      } else {
+        // all other values
+        dataObj[inputName] = value;
+      }
+    }
+    return dataObj;
+  };
+  const controlSubmit = () => {
+    surveyView.hideSurvey();
+    surveyView.showFinalView();
+    const dataObj = buildFormDataObject();
+    // @ts-ignore
+    SR.event.trackCustomEvent(MAIN_EVENT_NAME, dataObj).then(() => {
+      if (TRACK_STEPS) sendCustomData();
+    });
+  };
+  const controlEndSurvey = (inputEl) => {
+    const changeToEndSurveyMode = () => {
+      hide(surveyView.nextBtn);
+      show(surveyView.submitBtn);
+      surveyView.skipValidation();
+    };
+    const changeToNormalMode = () => {
+      show(surveyView.nextBtn);
+      hide(surveyView.submitBtn);
+      surveyView.bringBackValidation();
+    };
+    if (inputEl.type === "checkbox") {
+      if (inputEl.dataset.endsSurvey === "true") {
+        if (inputEl.checked) changeToEndSurveyMode();
+        else changeToNormalMode();
+      }
+    } else if (inputEl.type === "radio") {
+      if (inputEl.dataset.endsSurvey === "true") changeToEndSurveyMode();
+      else changeToNormalMode();
+    }
+  };
+  const init = () => {
+    surveyView.addSubmitHandler(controlSubmit);
+    surveyView.addCloseBtnHandler(controlSubmit);
+    surveyView.paginate();
+    controlButtons();
+    surveyView.addNextPageHandler(controlPageChange);
+    surveyView.addEndSurveyHandler(controlEndSurvey);
+  };
+  init();
+})();

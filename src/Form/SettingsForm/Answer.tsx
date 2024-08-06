@@ -17,7 +17,7 @@ const Answer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questionNo, 
   };
 
   const answerId = `${questionNo}-${answerNo}--answer`;
-  const isOpenId = `${questionNo}-${answerNo}--is-open`;
+  const isOpenId = `${questionNo}-${answerNo}--isOpen`;
 
   return (
     <>

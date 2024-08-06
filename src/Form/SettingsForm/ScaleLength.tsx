@@ -1,5 +1,5 @@
 const ScaleLength: React.FC<{ questionNo: number }> = ({ questionNo }) => {
-  const scaleLengthId = `${questionNo}--scale-length`;
+  const scaleLengthId = `${questionNo}--length`;
 
   return (
     <>

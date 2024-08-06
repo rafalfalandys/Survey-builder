@@ -29,22 +29,13 @@ export type QuestionImgs = Question & {
   legend: string[];
 };
 
-export type AnyQuestion =
-  | QuestionCheckbox
-  | QuestionRadio
-  | QuestionScale
-  | QuestionOpen
-  | QuestionImgs;
+export type AnyQuestion = QuestionCheckbox | QuestionRadio | QuestionScale | QuestionOpen | QuestionImgs;
 
-export type Answer =
-  | string
-  | number
-  | { answer: string | number; options?: AnswerOptions };
+export type Answer = string | number | { answer: string | number; options?: AnswerOptions };
 
 export type AnswerOptions = {
   isOpen?: boolean;
   limit?: number;
-  endsSurvey?: boolean;
 };
 
 export type ImgsConfig = string[];

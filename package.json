@@ -9,13 +9,28 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "resolutions": {
+    "react": "^17",
+    "react-dom": "^17",
+    "@types/react": "^17",
+    "@types/react-dom": "^17"
+  },
   "dependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@rollup/plugin-commonjs": "^26.0.1",
+    "@synerise/ds-button": "^0.21.4",
+    "@synerise/ds-core": "^0.40.18",
+    "@synerise/ds-utils": "0.28.1",
+    "antd": "4.7",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
+    "react-intl": "3.12.0",
+    "styled-components": "5.0.1",
+    "tslib": "^2.6.3"
   },
   "devDependencies": {
-    "@types/react": "^18.3.3",
-    "@types/react-dom": "^18.3.0",
+    "@types/node": "20",
+    "@types/react": "17.0.2",
+    "@types/react-dom": "17.0.2",
     "@typescript-eslint/eslint-plugin": "^7.13.1",
     "@typescript-eslint/parser": "^7.13.1",
     "@vitejs/plugin-react": "^4.3.1",

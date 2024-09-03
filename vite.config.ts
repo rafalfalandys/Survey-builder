@@ -16,6 +16,10 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: /^~/,
+        replacement: path.join(__dirname, "node_modules/"),
+      },
+      {
         find: "react-intl",
         replacement: path.resolve(__dirname, "node_modules/react-intl/dist/react-intl.js"),
       },

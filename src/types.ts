@@ -1,7 +1,9 @@
-export interface Question {
+export type QuestionType = "single" | "multi" | "scale" | "open" | "images" | "date";
+
+export type Question = {
   question: string;
-  required?: boolean;
-}
+  required: boolean;
+};
 
 export type QuestionRadio = Question & {
   answers: Answer[];
@@ -14,13 +16,13 @@ export type QuestionCheckbox = Question & {
 };
 
 export type QuestionScale = Question & {
-  length?: number;
+  length: number;
   type: "scale";
   legend: string[];
 };
 
 export type QuestionOpen = Question & {
-  limit?: number;
+  limit: number;
   type: "open";
 };
 
@@ -29,13 +31,24 @@ export type QuestionImgs = Question & {
   legend: string[];
 };
 
-export type AnyQuestion = QuestionCheckbox | QuestionRadio | QuestionScale | QuestionOpen | QuestionImgs;
+export type QuestionDate = Question & {
+  type: "date";
+  minDate: string;
+  maxDate: string;
+};
 
-export type Answer = string | number | { answer: string | number; options?: AnswerOptions };
+export type AnyQuestion = QuestionCheckbox | QuestionRadio | QuestionScale | QuestionOpen | QuestionImgs | QuestionDate;
+
+export type Answer = { answer: string | number; options: AnswerOptions };
 
 export type AnswerOptions = {
-  isOpen?: boolean;
-  limit?: number;
+  isOpen: boolean;
+  limit: number;
 };
 
 export type ImgsConfig = string[];
+
+export type AnswerIndex = {
+  index: number;
+  no: number;
+};

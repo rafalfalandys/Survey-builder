@@ -8,7 +8,7 @@ type AnswerType = {
   removeAnswerHandler: (index: number) => void;
 };
 
-const Answer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questionNo, answerNo }) => {
+const ClosedAnswer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questionNo, answerNo }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const isOpenHandler = (e: React.ChangeEvent) => {
@@ -37,4 +37,4 @@ const Answer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questionNo, 
   );
 };
 
-export default Answer;
+export default ClosedAnswer;

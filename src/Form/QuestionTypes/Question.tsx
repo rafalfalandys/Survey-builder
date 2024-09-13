@@ -1,36 +1,54 @@
-import { ChangeEvent, useState } from "react";
 import QuestionSingleAndMulti from "./QuestionSingleAndMulti";
-import { QuestionType } from "../../types";
 import QuestionOpen from "./QuestionOpen";
 import QuestionScale from "./QuestionScale";
 import QuestionImages from "./QuestionImages";
 import QuestionDate from "./QuestionDate";
+import { useDispatch, useSelector } from "react-redux";
+import { surveyActions } from "../../store/survey-slice";
+import { RootState } from "../../store";
+import { QuestionType } from "../../types";
+import { Input } from "@synerise/ds-input";
+import Select from "@synerise/ds-select/dist/Select";
+import Button from "@synerise/ds-button";
+import { SelectValue } from "antd/lib/select";
 
 type QuestionComp = {
-  removeQuestionHandler: (index: number) => void;
-  index: number;
-  questionNo: number;
+  questionIndex: number;
 };
 
-const Question: React.FC<QuestionComp> = ({ index, removeQuestionHandler, questionNo }) => {
-  const [type, setType] = useState<QuestionType | null>(null);
+const Question: React.FC<QuestionComp> = ({ questionIndex }) => {
+  const dispatch = useDispatch();
+  const questionsData = useSelector((state: RootState) => state.survey.questions);
 
-  const changeHandler = (e: ChangeEvent) => {
-    const selectEl = e.target as HTMLSelectElement;
-    setType(selectEl.value as QuestionType);
+  const questionTextHandler: React.ChangeEventHandler = (e) => {
+    const { value } = e.target as HTMLInputElement;
+    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { question: value } }));
+  };
+
+  const changeRequiredHandler: React.ChangeEventHandler = (e) => {
+    const { checked } = e.target as HTMLInputElement;
+    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { required: checked } }));
+  };
+
+  const changeTypeHandler = (value: SelectValue) => {
+    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { type: value as QuestionType } }));
+  };
+
+  const removeQuestionHandler = () => {
+    dispatch(surveyActions.removeQuestion(questionIndex));
   };
 
   const selectQuestionType = () => {
-    if (type === "multi" || type === "single") return <QuestionSingleAndMulti questionNo={questionNo} />;
-    if (type === "open") return <QuestionOpen questionNo={questionNo} />;
-    if (type === "scale") return <QuestionScale questionNo={questionNo} />;
-    if (type === "images") return <QuestionImages questionNo={questionNo} />;
-    if (type === "date") return <QuestionDate questionNo={questionNo} />;
+    const type = questionsData[questionIndex].type;
+    if (type === "multi" || type === "single") return <QuestionSingleAndMulti questionIndex={questionIndex} />;
+    if (type === "open") return <QuestionOpen questionIndex={questionIndex} />;
+    if (type === "scale") return <QuestionScale questionIndex={questionIndex} />;
+    if (type === "images") return <QuestionImages questionIndex={questionIndex} />;
+    if (type === "date") return <QuestionDate questionIndex={questionIndex} />;
   };
 
-  const renderQuestion = () => {
+  const renderQuestionSettings = () => {
     const question = selectQuestionType();
-
     return (
       <>
         {question}
@@ -39,42 +57,29 @@ const Question: React.FC<QuestionComp> = ({ index, removeQuestionHandler, questi
     );
   };
 
-  const questionId = `${questionNo}--question`;
-  const requiredId = `${questionNo}--required`;
-  const typeId = `${questionNo}--type`;
+  const { Option } = Select;
 
   return (
     <div>
-      <label htmlFor={questionId}>Question {questionNo + 1}:</label>
-      <input type="text" id={questionId} name={questionId} />
-      <br />
-
-      <label htmlFor={requiredId}>Required:</label>
-      <input type="checkbox" id={requiredId} name={requiredId} />
-      <br />
-
-      <label htmlFor={typeId}>Type</label>
-
-      <select name={typeId} id={typeId} onChange={changeHandler} defaultValue="">
-        <option disabled hidden value="">
+      <Input type="text" label={`Question ${questionIndex + 1}:`} onChange={questionTextHandler} />
+      <Input type="checkbox" label="Required:" onChange={changeRequiredHandler} />
+      <Select defaultValue={questionsData[questionIndex].type} onChange={changeTypeHandler}>
+        <Option disabled hidden value="empty">
           select type
-        </option>
-        <option value="multi">Multiple choice</option>
-        <option value="single">Single choice</option>
-        <option value="open">Open</option>
-        <option value="scale">Scale</option>
-        <option value="images">Images</option>
-        <option value="date">Date</option>
-      </select>
-      <br />
+        </Option>
+        <Option value="multi">Multiple choice</Option>
+        <Option value="single">Single choice</Option>
+        <Option value="open">Open</Option>
+        <Option value="scale">Scale</Option>
+        <Option value="images">Images</Option>
+        <Option value="date">Date</Option>
+      </Select>
 
-      {type && renderQuestion()}
+      {renderQuestionSettings()}
 
-      <button type="button" onClick={() => removeQuestionHandler(index)}>
+      <Button type="button" onClick={removeQuestionHandler}>
         Remove question
-      </button>
-      <br />
-      <br />
+      </Button>
     </div>
   );
 };

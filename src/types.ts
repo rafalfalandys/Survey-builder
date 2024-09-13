@@ -3,6 +3,7 @@ export type QuestionType = "single" | "multi" | "scale" | "open" | "images" | "d
 export type Question = {
   question: string;
   required: boolean;
+  questionIndex: number;
 };
 
 export type QuestionRadio = Question & {
@@ -37,7 +38,18 @@ export type QuestionDate = Question & {
   maxDate: string;
 };
 
-export type AnyQuestion = QuestionCheckbox | QuestionRadio | QuestionScale | QuestionOpen | QuestionImgs | QuestionDate;
+export type QuestionEmpty = Question & {
+  type: "empty";
+};
+
+export type AnyQuestion =
+  | QuestionCheckbox
+  | QuestionRadio
+  | QuestionScale
+  | QuestionOpen
+  | QuestionImgs
+  | QuestionDate
+  | QuestionEmpty;
 
 export type Answer = { answer: string | number; options: AnswerOptions };
 

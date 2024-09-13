@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { AnswerIndex } from "../../types";
 import Answer from "../SettingsComponents/ClosedAnswer";
+import Button from "@synerise/ds-button";
 
 type QuestionSingleAndMultiProps = {
-  questionNo: number;
+  questionIndex: number;
 };
 
-const QuestionSingleAndMulti: React.FC<QuestionSingleAndMultiProps> = ({ questionNo }) => {
+const QuestionSingleAndMulti: React.FC<QuestionSingleAndMultiProps> = ({ questionIndex }) => {
   const [answersIndexes, setAnswersIndexes] = useState<AnswerIndex[]>([
     { index: Date.now(), no: 0 },
     { index: Date.now() + 1, no: 1 },
@@ -22,15 +23,21 @@ const QuestionSingleAndMulti: React.FC<QuestionSingleAndMultiProps> = ({ questio
 
   {
     const answers = answersIndexes.map((el, i) => (
-      <Answer key={el.index} index={el.index} questionNo={questionNo} answerNo={i} removeAnswerHandler={removeAnswer} />
+      <Answer
+        key={el.index}
+        index={el.index}
+        questionIndex={questionIndex}
+        answerNo={i}
+        removeAnswerHandler={removeAnswer}
+      />
     ));
 
     return (
       <>
         {answers}
-        <button type="button" onClick={() => addAnswer()}>
+        <Button type="button" onClick={() => addAnswer()}>
           +
-        </button>
+        </Button>
         <br />
       </>
     );

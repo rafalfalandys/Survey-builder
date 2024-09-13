@@ -1,0 +1,28 @@
+.survey__question__wrapper {
+  margin-bottom: 24px;
+}
+
+.survey__text-question__wrapper {
+  display: flex;
+  align-items: end;
+  gap: 20px;
+}
+
+.survey__text-input {
+  width: 100%;
+}
+
+.survey__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+}
+
+.survey__checkbox > div:first-child {
+  margin-bottom: 4px;
+}
+
+.survey__select {
+  margin-bottom: 16px;
+}

@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { surveyActions } from "../../store/survey-slice";
 import { RootState } from "../../store";
 import { QuestionCheckbox, QuestionRadio } from "../../types";
+import classes from "./ClosedAnswer.module.scss";
 
 type AnswerType = {
   index: number;
@@ -29,20 +30,43 @@ const ClosedAnswer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questi
   };
 
   const isOpenHandler = (e: React.ChangeEvent) => {
-    const check = (e.target as HTMLInputElement).checked;
-    setIsOpen(check);
+    const { checked } = e.target as HTMLInputElement;
+    setIsOpen(checked);
+    const answers = [...questionData.answers];
+    const options = answers[answerNo].options;
+    answers[answerNo] = { ...answers[answerNo], options: { ...options, isOpen: checked } };
+    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { answers } }));
+  };
+
+  const limitHandler = (e: React.ChangeEvent) => {
+    const { value } = e.target as HTMLInputElement;
+    const answers = [...questionData.answers];
+    const options = answers[answerNo].options;
+    answers[answerNo] = { ...answers[answerNo], options: { ...options, limit: +value } };
+    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { answers } }));
   };
 
   return (
-    <>
-      <Input label={`Answer ${answerNo + 1}`} autoResize onChange={answerTextHandler} />
-      <Button type="button" onClick={() => removeAnswerHandler(index)}>
+    <div className="survey__text-question__wrapper">
+      <Input
+        label={`Answer ${answerNo + 1}`}
+        onChange={answerTextHandler}
+        className="survey__text-input"
+        value={questionData.answers[answerNo].answer}
+      />
+      <Button type="button" onClick={() => removeAnswerHandler(index)} className={classes.button}>
         -
       </Button>
-      <Input type="checkbox" onChange={isOpenHandler} label="Is open?" autoResize />
-      {isOpen && <Input type="number" defaultValue={DEFAULT_CHARS_LIMIT} label="Limit:" autoResize />}
+      <Input
+        type="checkbox"
+        onChange={isOpenHandler}
+        label="Is open?"
+        className="survey__checkbox"
+        // checked={questionData.answers[answerNo].options.isOpen}
+      />
+      {isOpen && <Input type="number" defaultValue={DEFAULT_CHARS_LIMIT} label="Limit:" onChange={limitHandler} />}
       <br />
-    </>
+    </div>
   );
 };
 

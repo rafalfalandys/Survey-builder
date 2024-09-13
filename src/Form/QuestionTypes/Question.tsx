@@ -60,10 +60,22 @@ const Question: React.FC<QuestionComp> = ({ questionIndex }) => {
   const { Option } = Select;
 
   return (
-    <div>
-      <Input type="text" label={`Question ${questionIndex + 1}:`} onChange={questionTextHandler} />
-      <Input type="checkbox" label="Required:" onChange={changeRequiredHandler} />
-      <Select defaultValue={questionsData[questionIndex].type} onChange={changeTypeHandler}>
+    <div className="survey__question__wrapper">
+      <div className="survey__text-question__wrapper">
+        <Input
+          type="text"
+          label={`Question ${questionIndex + 1}:`}
+          onChange={questionTextHandler}
+          className="survey__text-input"
+        />
+        <Input type="checkbox" label="Required:" onChange={changeRequiredHandler} className="survey__checkbox" />
+      </div>
+      <Select
+        defaultValue={questionsData[questionIndex].type}
+        onChange={changeTypeHandler}
+        label="Type"
+        className="survey__select"
+      >
         <Option disabled hidden value="empty">
           select type
         </Option>

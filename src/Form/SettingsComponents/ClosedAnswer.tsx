@@ -52,7 +52,7 @@ const ClosedAnswer: React.FC<AnswerType> = ({ index, removeAnswerHandler, questi
         label={`Answer ${answerNo + 1}`}
         onChange={answerTextHandler}
         className="survey__text-input"
-        value={questionData.answers[answerNo].answer}
+        // value={questionData.answers[answerNo].answer}
       />
       <Button type="button" onClick={() => removeAnswerHandler(index)} className={classes.button}>
         -

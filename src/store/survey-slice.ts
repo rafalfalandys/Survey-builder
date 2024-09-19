@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  Answer,
   AnswerOptions,
   AnyQuestion,
   QuestionCheckbox,
@@ -64,37 +63,37 @@ const surveySlice = createSlice({
       );
     },
 
-    setAnswerData(
+    setAnswerText(
       state,
       action: {
         type: string;
-        payload: { questionIndex: number; answerIndex: number; answerData: Partial<Answer> };
+        payload: { questionIndex: number; answerIndex: number; value: string };
       }
     ) {
-      const { questionIndex, answerIndex, answerData } = action.payload;
-      const newAnswer = {
-        ...(state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[
-          answerIndex
-        ],
-        answerData,
-      };
+      const { questionIndex, answerIndex, value } = action.payload;
 
-      (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[answerIndex] =
-        newAnswer;
+      (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[
+        answerIndex
+      ].answer = value;
     },
 
     setAnswerOptions(
       state,
       action: {
         type: string;
-        payload: { questionIndex: number; answerIndex: number; options: Partial<AnswerOptions> };
+        payload: {
+          questionIndex: number;
+          answerIndex: number;
+          optionsData: Partial<AnswerOptions>;
+        };
       }
     ) {
-      const { questionIndex, answerIndex, options } = action.payload;
+      const { questionIndex, answerIndex, optionsData } = action.payload;
+
       const newOptions = {
         ...(state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[answerIndex]
           .options,
-        options,
+        ...optionsData,
       };
 
       (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[

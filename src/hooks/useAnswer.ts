@@ -25,6 +25,17 @@ const useAnswer = (questionIndex: number, answerIndex: number) => {
     );
   };
 
+  const endsSurveyHandler: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const { checked } = e.target;
+    dispatch(
+      surveyActions.setAnswerOptions({
+        questionIndex,
+        answerIndex,
+        optionsData: { endsSurvey: checked },
+      })
+    );
+  };
+
   const removeAnswerHandler = () => {
     dispatch(surveyActions.removeAnswer({ questionIndex, answerIndex }));
   };
@@ -40,6 +51,7 @@ const useAnswer = (questionIndex: number, answerIndex: number) => {
     answerData,
     textHandler,
     isOpenHandler,
+    endsSurveyHandler,
     removeAnswerHandler,
     limitHandler,
   };

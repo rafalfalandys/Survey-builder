@@ -9,10 +9,14 @@ type AnswerType = {
 };
 
 const ClosedAnswer: React.FC<AnswerType> = ({ questionIndex, answerIndex }) => {
-  const { answerData, textHandler, isOpenHandler, removeAnswerHandler, limitHandler } = useAnswer(
-    questionIndex,
-    answerIndex
-  );
+  const {
+    answerData,
+    textHandler,
+    isOpenHandler,
+    removeAnswerHandler,
+    limitHandler,
+    endsSurveyHandler,
+  } = useAnswer(questionIndex, answerIndex);
 
   return (
     <div className="survey__text-question__wrapper">
@@ -25,6 +29,13 @@ const ClosedAnswer: React.FC<AnswerType> = ({ questionIndex, answerIndex }) => {
       <Button type="button" onClick={removeAnswerHandler} className={classes.button}>
         -
       </Button>
+      <Input
+        type="checkbox"
+        onChange={endsSurveyHandler}
+        label="Ends survey?"
+        className="survey__checkbox"
+        checked={answerData.options.endsSurvey}
+      />
       <Input
         type="checkbox"
         onChange={isOpenHandler}

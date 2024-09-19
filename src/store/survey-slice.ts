@@ -22,6 +22,7 @@ import {
   DEFAULT_MULTI,
   DEFAULT_SINGLE,
   EMPTY_QUESTION,
+  DEFAULT_SHUFFLE_ANSWERS,
 } from "../config";
 
 const initialState: {
@@ -34,6 +35,10 @@ const surveySlice = createSlice({
   name: "survey",
   initialState,
   reducers: {
+    setQuestions(state, action: { type: string; payload: AnyQuestion[] }) {
+      state.questions = action.payload;
+    },
+
     removeQuestion(state, action) {
       state.questions = state.questions
         .filter((_, i) => i !== action.payload)
@@ -175,6 +180,7 @@ const surveySlice = createSlice({
             (qState as QuestionCheckbox).answers ??
             DEFAULT_MULTI.answers,
           type: "multi",
+          shuffleAnswers: (qAction as QuestionCheckbox).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
         };
       }
 
@@ -210,6 +216,7 @@ const surveySlice = createSlice({
             (qAction as QuestionRadio).answers ??
             (qState as QuestionRadio).answers ??
             DEFAULT_SINGLE.answers,
+          shuffleAnswers: (qAction as QuestionRadio).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
         };
       }
 

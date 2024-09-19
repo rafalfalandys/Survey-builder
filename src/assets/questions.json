@@ -1,0 +1,126 @@
+[
+  {
+    "question": "What is your favourite day?",
+    "required": true,
+    "maxDate": "",
+    "minDate": "today",
+    "type": "date"
+  },
+  {
+    "question": "Do you like this survey?",
+    "required": true,
+    "legend": ["Worst", "Best"],
+    "type": "images"
+  },
+  {
+    "question": "What's most important to you when shopping online?",
+    "required": true,
+    "answers": [
+      {
+        "answer": "Fast Shipping",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Easy Returns",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Customer Reviews",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Exclusive Offers",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Product Variety",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Other (please specify):",
+        "options": {
+          "isOpen": true,
+          "limit": 20
+        }
+      }
+    ],
+    "type": "multi"
+  },
+  {
+    "question": "How likely would you recommend our company to your friends and known ones?",
+    "required": true,
+    "type": "scale",
+    "legend": ["Worst", "Best"],
+    "length": 15
+  },
+  {
+    "question": "How would you rate your experience with our products and services?",
+    "required": true,
+    "type": "scale",
+    "legend": ["Worst", "Best"],
+    "length": 10
+  },
+  {
+    "question": "How satisfied are you with the variety and selection of products available?",
+    "required": false,
+    "type": "single",
+    "answers": [
+      {
+        "answer": "Very Satisfied",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Satisfied",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Neutral",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Unsatisfied",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      },
+      {
+        "answer": "Very Unsatisfied",
+        "options": {
+          "isOpen": false,
+          "limit": 20
+        }
+      }
+    ]
+  },
+  {
+    "question": "What is the one thing we could do to improve your experience?",
+    "required": true,
+    "type": "open",
+    "limit": 20
+  }
+]

@@ -51,6 +51,17 @@ const useQuestion = (questionIndex: number) => {
     dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { length: +value } }));
   };
 
+  const addAnswerHandler = () => {
+    dispatch(surveyActions.addAnswer({ questionIndex }));
+  };
+
+  const shuffleAnswersHandler: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+    const { checked } = e.target;
+    dispatch(
+      surveyActions.setQuestionData({ questionIndex, questionData: { shuffleAnswers: checked } })
+    );
+  };
+
   return {
     questionData,
     questionTextHandler,
@@ -61,6 +72,8 @@ const useQuestion = (questionIndex: number) => {
     legendMinHandler,
     legendMaxHandler,
     changeLengthHandler,
+    addAnswerHandler,
+    shuffleAnswersHandler,
   };
 };
 

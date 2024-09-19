@@ -16,7 +16,13 @@ export const DEFAULT_MAX_SCALE = "Best";
 export const DEFAULT_REQUIRED = true;
 export const DEFAULT_MAX_DATE = "";
 export const DEFAULT_MIN_DATE = "";
-export const EMPTY_ANSWER: Answer = { answer: "", options: { isOpen: false, limit: DEFAULT_CHARS_LIMIT } };
+export const DEFAULT_ENDS_SURVEY = false;
+export const DEFAULT_SHUFFLE_ANSWERS = false;
+
+export const EMPTY_ANSWER: Answer = {
+  answer: "",
+  options: { isOpen: false, limit: DEFAULT_CHARS_LIMIT, endsSurvey: DEFAULT_ENDS_SURVEY },
+};
 
 export const EMPTY_QUESTION: QuestionEmpty = {
   question: "",
@@ -54,10 +60,12 @@ export const DEFAULT_MULTI: QuestionCheckbox = {
   ...EMPTY_QUESTION,
   type: "multi",
   answers: [EMPTY_ANSWER, EMPTY_ANSWER],
+  shuffleAnswers: DEFAULT_SHUFFLE_ANSWERS,
 };
 
 export const DEFAULT_SINGLE: QuestionRadio = {
   ...EMPTY_QUESTION,
   type: "single",
   answers: [EMPTY_ANSWER, EMPTY_ANSWER],
+  shuffleAnswers: DEFAULT_SHUFFLE_ANSWERS,
 };

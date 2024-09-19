@@ -8,11 +8,13 @@ export type Question = {
 export type QuestionRadio = Question & {
   answers: Answer[];
   type: "single";
+  shuffleAnswers: boolean;
 };
 
 export type QuestionCheckbox = Question & {
   answers: Answer[];
   type: "multi";
+  shuffleAnswers: boolean;
 };
 
 export type QuestionScale = Question & {
@@ -54,6 +56,7 @@ export type Answer = { answer: string | number; options: AnswerOptions };
 
 export type AnswerOptions = {
   isOpen: boolean;
+  endsSurvey: boolean;
   limit: number;
 };
 

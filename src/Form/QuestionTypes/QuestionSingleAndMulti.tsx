@@ -1,30 +1,30 @@
 import { QuestionCheckbox, QuestionRadio } from "../../types";
 import Answer from "../SettingsComponents/ClosedAnswer";
 import Button from "@synerise/ds-button";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../store";
-import { surveyActions } from "../../store/survey-slice";
+import { Input } from "@synerise/ds-input";
+import useQuestion from "../../hooks/useQuestion";
 
 type QuestionSingleAndMultiProps = {
   questionIndex: number;
 };
 
 const QuestionSingleAndMulti: React.FC<QuestionSingleAndMultiProps> = ({ questionIndex }) => {
-  const questionData = useSelector(
-    (state: RootState) => state.survey.questions[questionIndex] as QuestionRadio | QuestionCheckbox
-  );
-  const dispatch = useDispatch();
+  const { questionData, addAnswerHandler, shuffleAnswersHandler } = useQuestion(questionIndex);
+  const question = questionData as QuestionCheckbox | QuestionRadio;
 
-  const addAnswerHandler = () => {
-    dispatch(surveyActions.addAnswer({ questionIndex }));
-  };
-
-  const answers = questionData.answers.map((_, i) => (
+  const answers = question.answers.map((_, i) => (
     <Answer questionIndex={questionIndex} answerIndex={i} key={i} />
   ));
 
   return (
     <>
+      <Input
+        type="checkbox"
+        label="Shuffle answers"
+        onChange={shuffleAnswersHandler}
+        className="survey__checkbox"
+        checked={question.shuffleAnswers}
+      />
       {answers}
       <Button type="button" onClick={addAnswerHandler}>
         +

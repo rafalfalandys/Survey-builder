@@ -4,15 +4,13 @@ import Button from "@synerise/ds-button";
 import { useDispatch, useSelector } from "react-redux";
 import { surveyActions } from "../store/survey-slice";
 import { RootState } from "../store";
-import { generateEmptyQuestion } from "../helper";
 
 const QuestionsForm = () => {
   const dispatch = useDispatch();
   const questionsData = useSelector((state: RootState) => state.survey.questions);
 
   const addQuestionHandler = () => {
-    const question = generateEmptyQuestion(questionsData.length);
-    dispatch(surveyActions.addQuestion(question));
+    dispatch(surveyActions.addQuestion());
   };
 
   const questions = questionsData.map((_, i) => {

@@ -43,8 +43,8 @@ const surveySlice = createSlice({
         });
     },
 
-    addQuestion(state, action) {
-      state.questions.push(action.payload);
+    addQuestion(state) {
+      state.questions.push(EMPTY_QUESTION);
     },
 
     removeAnswer(

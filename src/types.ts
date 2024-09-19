@@ -3,7 +3,6 @@ export type QuestionType = "single" | "multi" | "scale" | "open" | "images" | "d
 export type Question = {
   question: string;
   required: boolean;
-  questionIndex: number;
 };
 
 export type QuestionRadio = Question & {

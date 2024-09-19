@@ -1,24 +1,29 @@
 import { Input } from "@synerise/ds-input";
-import { DEFAULT_SCALE_LENGTH } from "../../config";
-import { useDispatch } from "react-redux";
-import { surveyActions } from "../../store/survey-slice";
+import { useSelector } from "react-redux";
 import ScaleLegend from "../SettingsComponents/ScaleLegend";
+import { QuestionScale as ScaleType } from "../../types";
+import { RootState } from "../../store";
+import useQuestion from "../../hooks/useQuestion";
 
 type QuestionScaleProps = {
   questionIndex: number;
 };
 
 const QuestionScale: React.FC<QuestionScaleProps> = ({ questionIndex }) => {
-  const dispatch = useDispatch();
+  const questionData = useSelector((state: RootState) => state.survey.questions)[
+    questionIndex
+  ] as ScaleType;
 
-  const changeLengthHandler: React.ChangeEventHandler = (e) => {
-    const { value } = e.target as HTMLInputElement;
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { length: +value } }));
-  };
+  const { changeLengthHandler } = useQuestion(questionIndex);
 
   return (
     <>
-      <Input type="number" onChange={changeLengthHandler} defaultValue={DEFAULT_SCALE_LENGTH} label="Length:" />
+      <Input
+        type="number"
+        onChange={changeLengthHandler}
+        value={questionData.length}
+        label="Length:"
+      />
       <ScaleLegend questionIndex={questionIndex} />
     </>
   );

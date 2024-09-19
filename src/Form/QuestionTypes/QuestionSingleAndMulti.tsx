@@ -1,47 +1,37 @@
-import { useState } from "react";
-import { AnswerIndex } from "../../types";
+import { QuestionCheckbox, QuestionRadio } from "../../types";
 import Answer from "../SettingsComponents/ClosedAnswer";
 import Button from "@synerise/ds-button";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../store";
+import { surveyActions } from "../../store/survey-slice";
 
 type QuestionSingleAndMultiProps = {
   questionIndex: number;
 };
 
 const QuestionSingleAndMulti: React.FC<QuestionSingleAndMultiProps> = ({ questionIndex }) => {
-  const [answersIndexes, setAnswersIndexes] = useState<AnswerIndex[]>([
-    { index: Date.now(), no: 0 },
-    { index: Date.now() + 1, no: 1 },
-  ]);
+  const questionData = useSelector(
+    (state: RootState) => state.survey.questions[questionIndex] as QuestionRadio | QuestionCheckbox
+  );
+  const dispatch = useDispatch();
 
-  const addAnswer = () => {
-    setAnswersIndexes((prev) => [...prev, { index: Date.now(), no: prev.length }]);
+  const addAnswerHandler = () => {
+    dispatch(surveyActions.addAnswer({ questionIndex }));
   };
 
-  const removeAnswer = (index: number) => {
-    setAnswersIndexes((prev) => prev.filter((el) => el.index !== index));
-  };
+  const answers = questionData.answers.map((_, i) => (
+    <Answer questionIndex={questionIndex} answerIndex={i} key={i} />
+  ));
 
-  {
-    const answers = answersIndexes.map((el, i) => (
-      <Answer
-        key={el.index}
-        index={el.index}
-        questionIndex={questionIndex}
-        answerNo={i}
-        removeAnswerHandler={removeAnswer}
-      />
-    ));
-
-    return (
-      <>
-        {answers}
-        <Button type="button" onClick={() => addAnswer()}>
-          +
-        </Button>
-        <br />
-      </>
-    );
-  }
+  return (
+    <>
+      {answers}
+      <Button type="button" onClick={addAnswerHandler}>
+        +
+      </Button>
+      <br />
+    </>
+  );
 };
 
 export default QuestionSingleAndMulti;

@@ -1,5 +1,9 @@
+.survey__form {
+  padding: 2rem;
+}
+
 .survey__question__wrapper {
-  margin-bottom: 24px;
+  margin-bottom: 54px;
 }
 
 .survey__text-question__wrapper {

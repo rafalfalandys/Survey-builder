@@ -3,44 +3,28 @@ import QuestionOpen from "./QuestionOpen";
 import QuestionScale from "./QuestionScale";
 import QuestionImages from "./QuestionImages";
 import QuestionDate from "./QuestionDate";
-import { useDispatch, useSelector } from "react-redux";
-import { surveyActions } from "../../store/survey-slice";
-import { RootState } from "../../store";
-import { QuestionType } from "../../types";
 import { Input } from "@synerise/ds-input";
 import Select from "@synerise/ds-select/dist/Select";
 import Button from "@synerise/ds-button";
-import { SelectValue } from "antd/lib/select";
+import useQuestion from "../../hooks/useQuestion";
 
-type QuestionComp = {
+type QuestionProps = {
   questionIndex: number;
 };
 
-const Question: React.FC<QuestionComp> = ({ questionIndex }) => {
-  const dispatch = useDispatch();
-  const questionsData = useSelector((state: RootState) => state.survey.questions);
-
-  const questionTextHandler: React.ChangeEventHandler = (e) => {
-    const { value } = e.target as HTMLInputElement;
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { question: value } }));
-  };
-
-  const changeRequiredHandler: React.ChangeEventHandler = (e) => {
-    const { checked } = e.target as HTMLInputElement;
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { required: checked } }));
-  };
-
-  const changeTypeHandler = (value: SelectValue) => {
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { type: value as QuestionType } }));
-  };
-
-  const removeQuestionHandler = () => {
-    dispatch(surveyActions.removeQuestion(questionIndex));
-  };
+const Question: React.FC<QuestionProps> = ({ questionIndex }) => {
+  const {
+    questionData,
+    questionTextHandler,
+    changeRequiredHandler,
+    changeTypeHandler,
+    removeQuestionHandler,
+  } = useQuestion(questionIndex);
 
   const selectQuestionType = () => {
-    const type = questionsData[questionIndex].type;
-    if (type === "multi" || type === "single") return <QuestionSingleAndMulti questionIndex={questionIndex} />;
+    const type = questionData.type;
+    if (type === "multi" || type === "single")
+      return <QuestionSingleAndMulti questionIndex={questionIndex} />;
     if (type === "open") return <QuestionOpen questionIndex={questionIndex} />;
     if (type === "scale") return <QuestionScale questionIndex={questionIndex} />;
     if (type === "images") return <QuestionImages questionIndex={questionIndex} />;
@@ -67,11 +51,18 @@ const Question: React.FC<QuestionComp> = ({ questionIndex }) => {
           label={`Question ${questionIndex + 1}:`}
           onChange={questionTextHandler}
           className="survey__text-input"
+          value={questionData.question}
         />
-        <Input type="checkbox" label="Required:" onChange={changeRequiredHandler} className="survey__checkbox" />
+        <Input
+          type="checkbox"
+          label="Required:"
+          onChange={changeRequiredHandler}
+          className="survey__checkbox"
+          checked={questionData.required}
+        />
       </div>
       <Select
-        defaultValue={questionsData[questionIndex].type}
+        value={questionData.type}
         onChange={changeTypeHandler}
         label="Type"
         className="survey__select"

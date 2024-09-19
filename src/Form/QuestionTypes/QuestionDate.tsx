@@ -1,72 +1,80 @@
-import { useDispatch } from "react-redux";
-import { useEffect, useState } from "react";
-import { surveyActions } from "../../store/survey-slice";
+import { useSelector } from "react-redux";
 import { Input } from "@synerise/ds-input";
+import { RootState } from "../../store";
+import { QuestionDate as DateType } from "../../types";
+import useDate from "../../hooks/useDate";
 
 type QuestionDateProps = {
   questionIndex: number;
 };
 
 const QuestionDate: React.FC<QuestionDateProps> = ({ questionIndex }) => {
-  const [isMinLimit, setIsMinLimit] = useState(false);
-  const [isMaxLimit, setIsMaxLimit] = useState(false);
-  const [isDateMinVisible, setIsDateMinVisible] = useState(true);
-  const [isDateMaxVisible, setIsDateMaxVisible] = useState(true);
-  const dispatch = useDispatch();
+  const questionData = useSelector((state: RootState) => state.survey.questions)[
+    questionIndex
+  ] as DateType;
 
-  useEffect(() => {
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { type: "date" } }));
-  }, [dispatch, questionIndex]);
-
-  const changeDateHandler: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    const { type } = e.target.dataset;
-    const { value, checked } = e.target;
-
-    if (type === "minDate") {
-      dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { minDate: value } }));
-    }
-    if (type === "minDateToday") {
-      setIsDateMinVisible(!checked);
-      if (checked) dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { minDate: "today" } }));
-      else dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { minDate: "" } }));
-    }
-
-    if (type === "maxDate") {
-      dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { maxDate: value } }));
-    }
-    if (type === "maxDateToday") {
-      setIsDateMaxVisible(!checked);
-      if (checked) dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { maxDate: "today" } }));
-      else dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { maxDate: "" } }));
-    }
-  };
+  const {
+    isMinLimit,
+    isMaxLimit,
+    isDateMinVisible,
+    isDateMaxVisible,
+    showMinLimitHandler,
+    showMaxLimitHandler,
+    changeDateHandler,
+  } = useDate(questionIndex);
 
   return (
     <>
-      <Input type="checkbox" label="Minimum date limit" onChange={(e) => setIsMinLimit(e.target.checked)} />
+      <Input
+        type="checkbox"
+        label="Minimum date limit"
+        onChange={showMinLimitHandler}
+        className="survey__checkbox"
+      />
       {isMinLimit && (
         <>
-          {isDateMinVisible && <Input type="date" onChange={changeDateHandler} data-type="minDate" />}
           <Input
             type="checkbox"
             label="Day of taking the survey"
             onChange={changeDateHandler}
             data-type="minDateToday"
+            className="survey__checkbox"
+            checked={questionData.minDate === "today"}
           />
+          {isDateMinVisible && (
+            <Input
+              type="date"
+              onChange={changeDateHandler}
+              data-type="minDate"
+              value={questionData.minDate}
+            />
+          )}
         </>
       )}
-      <Input type="checkbox" label="Maximum date limit" onChange={(e) => setIsMaxLimit(e.target.checked)} />
+      <Input
+        type="checkbox"
+        label="Maximum date limit"
+        onChange={showMaxLimitHandler}
+        className="survey__checkbox"
+      />
       {isMaxLimit && (
         <>
-          {isDateMaxVisible && (
-            <Input type="date" label="Maximum date" onChange={changeDateHandler} data-type="maxDate" />
-          )}
           <Input
             type="checkbox"
             label="Day of taking the survey"
             onChange={changeDateHandler}
             data-type="maxDateToday"
+            className="survey__checkbox"
+            checked={questionData.maxDate === "today"}
           />
+          {isDateMaxVisible && (
+            <Input
+              type="date"
+              onChange={changeDateHandler}
+              data-type="maxDate"
+              value={questionData.maxDate}
+            />
+          )}
         </>
       )}
     </>

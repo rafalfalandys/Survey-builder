@@ -15,22 +15,20 @@ const QuestionsForm = () => {
     dispatch(surveyActions.addQuestion(question));
   };
 
-  const questions = questionsData.map((el) => {
-    return <Question key={el.questionIndex} questionIndex={el.questionIndex} />;
+  const questions = questionsData.map((_, i) => {
+    return <Question questionIndex={i} key={i} />;
   });
 
   console.log(questionsData);
 
   return (
-    <form>
+    <form className="survey__form">
       {questions}
       <Button type="button" onClick={addQuestionHandler}>
         Add question
       </Button>
       <br />
       <br />
-
-      <Button>Submit</Button>
     </form>
   );
 };

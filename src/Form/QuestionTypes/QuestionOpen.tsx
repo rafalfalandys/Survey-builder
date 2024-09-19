@@ -1,21 +1,22 @@
 import { Input } from "@synerise/ds-input";
-import { DEFAULT_CHARS_LIMIT } from "../../config";
-import { useDispatch } from "react-redux";
-import { surveyActions } from "../../store/survey-slice";
+import { QuestionOpen as OpenType } from "../../types";
+import useQuestion from "../../hooks/useQuestion";
 
 type QuestionOpenProps = {
   questionIndex: number;
 };
 
 const QuestionOpen: React.FC<QuestionOpenProps> = ({ questionIndex }) => {
-  const dispatch = useDispatch();
+  const { questionData, changeLimitHandler } = useQuestion(questionIndex);
 
-  const changeHandler: React.ChangeEventHandler = (e) => {
-    const { value } = e.target as HTMLInputElement;
-    dispatch(surveyActions.setQuestionData({ questionIndex, questionData: { limit: +value } }));
-  };
-
-  return <Input type="number" defaultValue={DEFAULT_CHARS_LIMIT} label="Limit:" onChange={changeHandler} />;
+  return (
+    <Input
+      type="number"
+      value={(questionData as OpenType).limit}
+      label="Limit:"
+      onChange={changeLimitHandler}
+    />
+  );
 };
 
 export default QuestionOpen;

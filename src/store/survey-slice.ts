@@ -51,9 +51,11 @@ const surveySlice = createSlice({
       action: { type: string; payload: { questionIndex: number; answerIndex: number } }
     ) {
       const { questionIndex, answerIndex } = action.payload;
-      (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers.filter(
-        (_, i) => i !== answerIndex
-      );
+      const newAnswers = (
+        state.questions[questionIndex] as QuestionRadio | QuestionCheckbox
+      ).answers.filter((_, i) => i !== answerIndex);
+
+      (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers = newAnswers;
     },
 
     addAnswer(state, action: { type: string; payload: { questionIndex: number } }) {

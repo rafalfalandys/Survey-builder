@@ -41,7 +41,7 @@ const surveySlice = createSlice({
 
     removeQuestion(state, action) {
       state.questions = state.questions
-        .filter((_, i) => i !== action.payload)
+        .filter((el) => el.questionId !== action.payload)
         .map((el, questionIndex) => {
           return { ...el, questionIndex };
         });
@@ -49,6 +49,28 @@ const surveySlice = createSlice({
 
     addQuestion(state) {
       state.questions.push(EMPTY_QUESTION);
+    },
+
+    setQuestionOrder(
+      state,
+      action: { type: string; payload: { questionIndex: number; newQuestionIndex: number } }
+    ) {
+      const { questionIndex, newQuestionIndex } = action.payload;
+      const question = state.questions[questionIndex];
+      const questionsFiltered = state.questions.filter((_, i) => i !== questionIndex);
+      const questionsBefore = questionsFiltered.slice(0, newQuestionIndex);
+      const questionsAfter = questionsFiltered.slice(newQuestionIndex);
+      let newQuestions;
+
+      if (newQuestionIndex === -1) {
+        newQuestions = [...questionsBefore, ...questionsAfter, question];
+      } else if (newQuestionIndex > questionsFiltered.length) {
+        newQuestions = [question, ...questionsBefore, ...questionsAfter];
+      } else {
+        newQuestions = [...questionsBefore, question, ...questionsAfter];
+      }
+
+      if (newQuestions) state.questions = newQuestions;
     },
 
     removeAnswer(
@@ -136,25 +158,24 @@ const surveySlice = createSlice({
     ) {
       const { questionIndex, questionData } = action.payload;
       const qState = state.questions[questionIndex];
-      const qAction = action.payload.questionData as AnyQuestion;
       const type = questionData.type ?? qState.type;
 
       // 3 params are common for all, if not specified in action - keep them as they are in state
       const newQuestionBaseParams = {
         question: questionData.question ?? qState.question ?? "",
         required: questionData.required ?? qState.required ?? false,
-        // questionIndex: questionData.questionIndex ?? qState.questionIndex,
+        questionId: questionData.questionId ?? qState?.questionId ?? Math.random(),
       };
 
       if (type === "date") {
         (state.questions[questionIndex] as QuestionDate) = {
           ...newQuestionBaseParams,
           maxDate:
-            (qAction as QuestionDate).maxDate ??
+            (questionData as QuestionDate).maxDate ??
             (qState as QuestionDate).maxDate ??
             DEFAULT_MAX_DATE,
           minDate:
-            (qAction as QuestionDate).minDate ??
+            (questionData as QuestionDate).minDate ??
             (qState as QuestionDate).minDate ??
             DEFAULT_MIN_DATE,
           type: "date",
@@ -165,7 +186,7 @@ const surveySlice = createSlice({
         (state.questions[questionIndex] as QuestionImgs) = {
           ...newQuestionBaseParams,
           legend:
-            (qAction as QuestionImgs).legend ??
+            (questionData as QuestionImgs).legend ??
             (qState as QuestionImgs).legend ??
             DEFAULT_IMAGES.legend,
           type: "images",
@@ -176,11 +197,12 @@ const surveySlice = createSlice({
         (state.questions[questionIndex] as QuestionCheckbox) = {
           ...newQuestionBaseParams,
           answers:
-            (qAction as QuestionCheckbox).answers ??
+            (questionData as QuestionCheckbox).answers ??
             (qState as QuestionCheckbox).answers ??
             DEFAULT_MULTI.answers,
           type: "multi",
-          shuffleAnswers: (qAction as QuestionCheckbox).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
+          shuffleAnswers:
+            (questionData as QuestionCheckbox).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
         };
       }
 
@@ -189,7 +211,7 @@ const surveySlice = createSlice({
           ...newQuestionBaseParams,
           type: "open",
           limit:
-            (qAction as QuestionOpen).limit ??
+            (questionData as QuestionOpen).limit ??
             (qState as QuestionOpen).limit ??
             DEFAULT_CHARS_LIMIT,
         };
@@ -199,10 +221,10 @@ const surveySlice = createSlice({
         (state.questions[questionIndex] as QuestionScale) = {
           ...newQuestionBaseParams,
           type: "scale",
-          legend: (qAction as QuestionScale).legend ??
+          legend: (questionData as QuestionScale).legend ??
             (qState as QuestionScale).legend ?? [DEFAULT_MIN_SCALE, DEFAULT_MAX_SCALE],
           length:
-            (qAction as QuestionScale).length ??
+            (questionData as QuestionScale).length ??
             (qState as QuestionScale).length ??
             DEFAULT_SCALE_LENGTH,
         };
@@ -213,10 +235,10 @@ const surveySlice = createSlice({
           ...newQuestionBaseParams,
           type: "single",
           answers:
-            (qAction as QuestionRadio).answers ??
+            (questionData as QuestionRadio).answers ??
             (qState as QuestionRadio).answers ??
             DEFAULT_SINGLE.answers,
-          shuffleAnswers: (qAction as QuestionRadio).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
+          shuffleAnswers: (questionData as QuestionRadio).shuffleAnswers ?? DEFAULT_SHUFFLE_ANSWERS,
         };
       }
 

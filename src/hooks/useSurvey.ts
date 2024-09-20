@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
 import { surveyActions } from "../store/survey-slice";
+import { AnyQuestion } from "../types";
 
 const useSurvey = () => {
   const dispatch = useDispatch();
@@ -8,8 +9,10 @@ const useSurvey = () => {
 
   const setSurveyData = (questionsData: string) => {
     try {
-      const parsedQuestions = JSON.parse(questionsData);
-      dispatch(surveyActions.setQuestions(parsedQuestions));
+      const parsedQuestions = JSON.parse(questionsData) as AnyQuestion[];
+      parsedQuestions.forEach((el, i) => {
+        dispatch(surveyActions.setQuestionData({ questionIndex: i, questionData: el }));
+      });
     } catch (error) {
       console.error("Invalid questionsData", error);
     }

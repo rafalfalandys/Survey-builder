@@ -19,7 +19,7 @@ const ClosedAnswer: React.FC<AnswerType> = ({ questionIndex, answerIndex }) => {
   } = useAnswer(questionIndex, answerIndex);
 
   return (
-    <div className="survey__text-question__wrapper">
+    <div className="survey__flex--align-end">
       <Input
         label={`Answer ${answerIndex + 1}`}
         onChange={textHandler}

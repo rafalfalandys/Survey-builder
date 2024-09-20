@@ -7,18 +7,24 @@ import { Input } from "@synerise/ds-input";
 import Select from "@synerise/ds-select/dist/Select";
 import Button from "@synerise/ds-button";
 import useQuestion from "../../hooks/useQuestion";
+//@ts-expect-error package has no types
+import Icon, { AngleUpM, AngleDownM } from "@synerise/ds-icon";
+import classes from "./Question.module.scss";
+import Collapse from "../../UI/Collapse";
 
 type QuestionProps = {
   questionIndex: number;
+  questionId: number;
 };
 
-const Question: React.FC<QuestionProps> = ({ questionIndex }) => {
+const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
   const {
     questionData,
     questionTextHandler,
     changeRequiredHandler,
     changeTypeHandler,
     removeQuestionHandler,
+    moveQuestionHandler,
   } = useQuestion(questionIndex);
 
   const selectQuestionType = () => {
@@ -44,45 +50,62 @@ const Question: React.FC<QuestionProps> = ({ questionIndex }) => {
   const { Option } = Select;
 
   return (
-    <div className="survey__question__wrapper">
-      <div className="survey__text-question__wrapper">
-        <Input
-          type="text"
-          label={`Question ${questionIndex + 1}:`}
-          onChange={questionTextHandler}
-          className="survey__text-input"
-          value={questionData.question}
+    <div className={classes.questionContainer}>
+      <div className={classes.question}>
+        <div className="survey__flex--align-end">
+          <Input
+            type="text"
+            label={`Question ${questionIndex + 1}:`}
+            onChange={questionTextHandler}
+            className="survey__text-input"
+            value={questionData.question}
+          />
+          <Input
+            type="checkbox"
+            label="Required:"
+            onChange={changeRequiredHandler}
+            className="survey__checkbox"
+            checked={questionData.required}
+          />
+        </div>
+        <Collapse header={`Settings`}>
+          <Select
+            value={questionData.type}
+            onChange={changeTypeHandler}
+            label="Type"
+            className="survey__select"
+          >
+            <Option disabled hidden value="empty">
+              select type
+            </Option>
+            <Option value="multi">Multiple choice</Option>
+            <Option value="single">Single choice</Option>
+            <Option value="open">Open</Option>
+            <Option value="scale">Scale</Option>
+            <Option value="images">Images</Option>
+            <Option value="date">Date</Option>
+          </Select>
+
+          {renderQuestionSettings()}
+        </Collapse>
+
+        <Button type="button" onClick={removeQuestionHandler.bind(null, questionId)}>
+          Remove question
+        </Button>
+      </div>
+
+      <div className={classes.orderButtons}>
+        <Icon
+          component={<AngleUpM />}
+          color="#384350"
+          onClick={moveQuestionHandler.bind(null, questionIndex - 1)}
         />
-        <Input
-          type="checkbox"
-          label="Required:"
-          onChange={changeRequiredHandler}
-          className="survey__checkbox"
-          checked={questionData.required}
+        <Icon
+          component={<AngleDownM />}
+          color="#384350"
+          onClick={moveQuestionHandler.bind(null, questionIndex + 1)}
         />
       </div>
-      <Select
-        value={questionData.type}
-        onChange={changeTypeHandler}
-        label="Type"
-        className="survey__select"
-      >
-        <Option disabled hidden value="empty">
-          select type
-        </Option>
-        <Option value="multi">Multiple choice</Option>
-        <Option value="single">Single choice</Option>
-        <Option value="open">Open</Option>
-        <Option value="scale">Scale</Option>
-        <Option value="images">Images</Option>
-        <Option value="date">Date</Option>
-      </Select>
-
-      {renderQuestionSettings()}
-
-      <Button type="button" onClick={removeQuestionHandler}>
-        Remove question
-      </Button>
     </div>
   );
 };

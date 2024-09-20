@@ -1,0 +1,16 @@
+.questionContainer {
+  display: flex;
+  gap: 20px;
+}
+
+.question {
+  margin-bottom: 54px;
+  width: 100%;
+}
+
+.orderButtons {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 2rem 0;
+}

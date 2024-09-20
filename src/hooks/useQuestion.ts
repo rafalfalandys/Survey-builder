@@ -27,8 +27,9 @@ const useQuestion = (questionIndex: number) => {
     );
   };
 
-  const removeQuestionHandler = () => {
-    dispatch(surveyActions.removeQuestion(questionIndex));
+  const removeQuestionHandler = (questionId: number) => {
+    console.log(questionId);
+    dispatch(surveyActions.removeQuestion(questionId));
   };
 
   const changeLimitHandler: React.ChangeEventHandler = (e) => {
@@ -62,6 +63,10 @@ const useQuestion = (questionIndex: number) => {
     );
   };
 
+  const moveQuestionHandler = (newQuestionIndex: number) => {
+    dispatch(surveyActions.setQuestionOrder({ questionIndex, newQuestionIndex }));
+  };
+
   return {
     questionData,
     questionTextHandler,
@@ -74,6 +79,7 @@ const useQuestion = (questionIndex: number) => {
     changeLengthHandler,
     addAnswerHandler,
     shuffleAnswersHandler,
+    moveQuestionHandler,
   };
 };
 

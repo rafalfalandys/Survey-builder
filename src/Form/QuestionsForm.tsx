@@ -19,12 +19,11 @@ const QuestionsForm = () => {
     dispatch(surveyActions.addQuestion());
   };
 
-  const questions = questionsData.map((_, i) => {
-    return <Question questionIndex={i} key={i} />;
+  const questions = questionsData.map((el, i) => {
+    return <Question questionIndex={i} questionId={el.questionId} key={el.questionId} />;
   });
 
   const setSurveyDataHandler = (data: { surveyData: string }) => {
-    console.log(data);
     setSurveyData(data.surveyData);
   };
 
@@ -32,17 +31,18 @@ const QuestionsForm = () => {
 
   return (
     <>
-      <form className="survey__form">
+      <Form className="survey__form" onValuesChange={(e) => console.log(e)}>
         {questions}
         <Button type="button" onClick={addQuestionHandler}>
           Add question
         </Button>
-      </form>
+      </Form>
 
       <Form
         form={form}
         className="survey__form"
         onFinish={setSurveyDataHandler}
+        onValuesChange={(e) => console.log(e)}
         initialValues={{
           surveyData: JSON.stringify(sampleQuestions, null, 2),
         }}

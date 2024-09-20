@@ -28,6 +28,7 @@ export const EMPTY_QUESTION: QuestionEmpty = {
   question: "",
   required: DEFAULT_REQUIRED,
   type: "empty",
+  questionId: Math.random(),
 };
 
 export const DEFAULT_DATE: QuestionDate = {

@@ -24,7 +24,7 @@ const Collapse: React.FC<CollapseProps> = ({ children, header }) => {
         />
         <span className={classes.header}>{header}</span>
       </div>
-      {isOpen && children}
+      <div className={`${classes.content} ${isOpen && classes.open}`}>{children}</div>
     </>
   );
 };

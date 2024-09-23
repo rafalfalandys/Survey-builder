@@ -28,7 +28,6 @@ const useQuestion = (questionIndex: number) => {
   };
 
   const removeQuestionHandler = (questionId: number) => {
-    console.log(questionId);
     dispatch(surveyActions.removeQuestion(questionId));
   };
 

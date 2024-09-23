@@ -52,14 +52,14 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
   return (
     <div className={classes.questionContainer}>
       <div className={classes.question}>
-        <div className="survey__flex--align-end">
-          <Input
-            type="text"
-            label={`Question ${questionIndex + 1}:`}
-            onChange={questionTextHandler}
-            className="survey__text-input"
-            value={questionData.question}
-          />
+        <Input
+          type="text"
+          label={`Question ${questionIndex + 1}:`}
+          onChange={questionTextHandler}
+          className="survey__text-input"
+          value={questionData.question}
+        />
+        <Collapse header={`Settings`}>
           <Input
             type="checkbox"
             label="Required:"
@@ -67,13 +67,11 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
             className="survey__checkbox"
             checked={questionData.required}
           />
-        </div>
-        <Collapse header={`Settings`}>
           <Select
             value={questionData.type}
             onChange={changeTypeHandler}
             label="Type"
-            className="survey__select"
+            className={classes.type}
           >
             <Option disabled hidden value="empty">
               select type

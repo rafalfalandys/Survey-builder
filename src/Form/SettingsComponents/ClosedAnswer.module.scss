@@ -11,3 +11,11 @@
 .button {
   margin-bottom: 16px;
 }
+
+.orderArrows {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 10px;
+}

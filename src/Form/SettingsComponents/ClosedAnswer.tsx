@@ -2,6 +2,8 @@ import { Input } from "@synerise/ds-input";
 import Button from "@synerise/ds-button";
 import classes from "./ClosedAnswer.module.scss";
 import useAnswer from "../../hooks/useAnswer";
+//@ts-expect-error package has no types
+import Icon, { AngleUpS, AngleDownS } from "@synerise/ds-icon";
 
 type AnswerType = {
   questionIndex: number;
@@ -16,6 +18,7 @@ const ClosedAnswer: React.FC<AnswerType> = ({ questionIndex, answerIndex }) => {
     removeAnswerHandler,
     limitHandler,
     endsSurveyHandler,
+    changeOrderHandler,
   } = useAnswer(questionIndex, answerIndex);
 
   return (
@@ -51,7 +54,18 @@ const ClosedAnswer: React.FC<AnswerType> = ({ questionIndex, answerIndex }) => {
           onChange={limitHandler}
         />
       )}
-      <br />
+      <div className={classes.orderArrows}>
+        <Icon
+          component={<AngleUpS />}
+          color="#384350"
+          onClick={changeOrderHandler.bind(null, answerIndex - 1)}
+        />
+        <Icon
+          component={<AngleDownS />}
+          color="#384350"
+          onClick={changeOrderHandler.bind(null, answerIndex + 1)}
+        />
+      </div>
     </div>
   );
 };

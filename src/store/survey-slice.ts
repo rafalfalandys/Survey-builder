@@ -40,11 +40,7 @@ const surveySlice = createSlice({
     },
 
     removeQuestion(state, action) {
-      state.questions = state.questions
-        .filter((el) => el.questionId !== action.payload)
-        .map((el, questionIndex) => {
-          return { ...el, questionIndex };
-        });
+      state.questions = state.questions.filter((el) => el.questionId !== action.payload);
     },
 
     addQuestion(state) {
@@ -128,6 +124,35 @@ const surveySlice = createSlice({
       (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers[
         answerIndex
       ].options = newOptions;
+    },
+
+    setAnswerOrder(
+      state,
+      action: {
+        type: string;
+        payload: { questionIndex: number; answerIndex: number; newAnswerIndex: number };
+      }
+    ) {
+      const { questionIndex, answerIndex, newAnswerIndex } = action.payload;
+      const question = state.questions[questionIndex] as QuestionRadio | QuestionCheckbox;
+      const answer = question.answers[answerIndex];
+
+      const answersFiltered = question.answers.filter((_, i) => i !== answerIndex);
+      const answersBefore = answersFiltered.slice(0, newAnswerIndex);
+      const questionsAfter = answersFiltered.slice(newAnswerIndex);
+
+      let newAnswers;
+
+      if (newAnswerIndex === -1) {
+        newAnswers = [...answersBefore, ...questionsAfter, answer];
+      } else if (newAnswerIndex > answersFiltered.length) {
+        newAnswers = [answer, ...answersBefore, ...questionsAfter];
+      } else {
+        newAnswers = [...answersBefore, answer, ...questionsAfter];
+      }
+
+      if (newAnswers)
+        (state.questions[questionIndex] as QuestionRadio | QuestionCheckbox).answers = newAnswers;
     },
 
     setMinLegend(

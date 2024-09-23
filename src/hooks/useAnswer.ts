@@ -40,6 +40,10 @@ const useAnswer = (questionIndex: number, answerIndex: number) => {
     dispatch(surveyActions.removeAnswer({ questionIndex, answerIndex }));
   };
 
+  const changeOrderHandler = (newAnswerIndex: number) => {
+    dispatch(surveyActions.setAnswerOrder({ questionIndex, answerIndex, newAnswerIndex }));
+  };
+
   const limitHandler = (e: React.ChangeEvent) => {
     const { value } = e.target as HTMLInputElement;
     dispatch(
@@ -54,6 +58,7 @@ const useAnswer = (questionIndex: number, answerIndex: number) => {
     endsSurveyHandler,
     removeAnswerHandler,
     limitHandler,
+    changeOrderHandler,
   };
 };
 

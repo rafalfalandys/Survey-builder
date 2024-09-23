@@ -52,13 +52,22 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
   return (
     <div className={classes.questionContainer}>
       <div className={classes.question}>
-        <Input
-          type="text"
-          label={`Question ${questionIndex + 1}:`}
-          onChange={questionTextHandler}
-          className="survey__text-input"
-          value={questionData.question}
-        />
+        <div className={classes.textAndBtn}>
+          <Input
+            type="text"
+            label={`Question ${questionIndex + 1}:`}
+            onChange={questionTextHandler}
+            className="survey__text-input"
+            value={questionData.question}
+          />
+          <Button
+            type="button"
+            onClick={removeQuestionHandler.bind(null, questionId)}
+            className={classes.removeBtn}
+          >
+            Remove
+          </Button>
+        </div>
         <Collapse header={`Settings`}>
           <Input
             type="checkbox"
@@ -86,10 +95,6 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
 
           {renderQuestionSettings()}
         </Collapse>
-
-        <Button type="button" onClick={removeQuestionHandler.bind(null, questionId)}>
-          Remove question
-        </Button>
       </div>
 
       <div className={classes.orderButtons}>

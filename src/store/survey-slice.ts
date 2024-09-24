@@ -21,14 +21,14 @@ import {
   DEFAULT_IMAGES,
   DEFAULT_MULTI,
   DEFAULT_SINGLE,
-  EMPTY_QUESTION,
   DEFAULT_SHUFFLE_ANSWERS,
 } from "../config";
+import { getEmptyQuestion } from "../helper";
 
 const initialState: {
   questions: AnyQuestion[];
 } = {
-  questions: [EMPTY_QUESTION],
+  questions: [getEmptyQuestion()],
 };
 
 const surveySlice = createSlice({
@@ -44,7 +44,7 @@ const surveySlice = createSlice({
     },
 
     addQuestion(state) {
-      state.questions.push(EMPTY_QUESTION);
+      state.questions.push(getEmptyQuestion());
     },
 
     setQuestionOrder(

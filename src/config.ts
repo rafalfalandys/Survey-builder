@@ -1,8 +1,8 @@
+import { getEmptyQuestion } from "./helper";
 import {
   Answer,
   QuestionCheckbox,
   QuestionDate,
-  QuestionEmpty,
   QuestionImgs,
   QuestionOpen,
   QuestionRadio,
@@ -24,48 +24,41 @@ export const EMPTY_ANSWER: Answer = {
   options: { isOpen: false, limit: DEFAULT_CHARS_LIMIT, endsSurvey: DEFAULT_ENDS_SURVEY },
 };
 
-export const EMPTY_QUESTION: QuestionEmpty = {
-  question: "",
-  required: DEFAULT_REQUIRED,
-  type: "empty",
-  questionId: Math.random(),
-};
-
 export const DEFAULT_DATE: QuestionDate = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "date",
   maxDate: "",
   minDate: "",
 };
 
 export const DEFAULT_IMAGES: QuestionImgs = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "images",
   legend: [DEFAULT_MIN_SCALE, DEFAULT_MAX_SCALE],
 };
 
 export const DEFAULT_OPEN: QuestionOpen = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "open",
   limit: DEFAULT_CHARS_LIMIT,
 };
 
 export const DEFAULT_SCALE: QuestionScale = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "scale",
   legend: [DEFAULT_MIN_SCALE, DEFAULT_MAX_SCALE],
   length: DEFAULT_SCALE_LENGTH,
 };
 
 export const DEFAULT_MULTI: QuestionCheckbox = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "multi",
   answers: [EMPTY_ANSWER, EMPTY_ANSWER],
   shuffleAnswers: DEFAULT_SHUFFLE_ANSWERS,
 };
 
 export const DEFAULT_SINGLE: QuestionRadio = {
-  ...EMPTY_QUESTION,
+  ...getEmptyQuestion(),
   type: "single",
   answers: [EMPTY_ANSWER, EMPTY_ANSWER],
   shuffleAnswers: DEFAULT_SHUFFLE_ANSWERS,

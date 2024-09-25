@@ -30,8 +30,9 @@ const QuestionDate: React.FC<QuestionDateProps> = ({ questionIndex }) => {
         label="Minimum date limit"
         onChange={showMinLimitHandler}
         className="survey__checkbox"
+        checked={isMinLimit}
       />
-      {isMinLimit && (
+      {(isMinLimit || questionData.minDate) && (
         <>
           <Input
             type="checkbox"
@@ -56,8 +57,9 @@ const QuestionDate: React.FC<QuestionDateProps> = ({ questionIndex }) => {
         label="Maximum date limit"
         onChange={showMaxLimitHandler}
         className="survey__checkbox"
+        checked={isMaxLimit}
       />
-      {isMaxLimit && (
+      {(isMaxLimit || questionData.maxDate) && (
         <>
           <Input
             type="checkbox"
@@ -67,7 +69,7 @@ const QuestionDate: React.FC<QuestionDateProps> = ({ questionIndex }) => {
             className="survey__checkbox"
             checked={questionData.maxDate === "today"}
           />
-          {isDateMaxVisible && (
+          {(isDateMaxVisible || (questionData.maxDate && questionData.maxDate !== "today")) && (
             <Input
               type="date"
               onChange={changeDateHandler}

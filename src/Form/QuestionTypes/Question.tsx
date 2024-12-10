@@ -5,10 +5,9 @@ import QuestionImages from "./QuestionImages";
 import QuestionDate from "./QuestionDate";
 import { Input } from "@synerise/ds-input";
 import Select from "@synerise/ds-select/dist/Select";
-import Button from "@synerise/ds-button";
 import useQuestion from "../../hooks/useQuestion";
 //@ts-expect-error package has no types
-import Icon, { AngleUpM, AngleDownM } from "@synerise/ds-icon";
+import Icon, { AngleUpM, AngleDownM, Remove2M } from "@synerise/ds-icon";
 import classes from "./Question.module.scss";
 import Collapse from "../../UI/Collapse";
 
@@ -28,7 +27,7 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
   } = useQuestion(questionIndex);
 
   const selectQuestionType = () => {
-    const type = questionData.type;
+    const { type } = questionData;
     if (type === "multi" || type === "single")
       return <QuestionSingleAndMulti questionIndex={questionIndex} />;
     if (type === "open") return <QuestionOpen questionIndex={questionIndex} />;
@@ -53,22 +52,16 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
     <div className={classes.questionContainer}>
       <div className={classes.question}>
         <div className={classes.textAndBtn}>
+          <h5 className={classes.header}>{`${questionIndex + 1}. ${questionData.question}`}</h5>
+        </div>
+        <Collapse header={`Settings`}>
           <Input
             type="text"
-            label={`Question ${questionIndex + 1}:`}
+            label="Question"
             onChange={questionTextHandler}
             className="survey__text-input"
             value={questionData.question}
           />
-          <Button
-            type="button"
-            onClick={removeQuestionHandler.bind(null, questionId)}
-            className={classes.removeBtn}
-          >
-            Remove
-          </Button>
-        </div>
-        <Collapse header={`Settings`}>
           <Input
             type="checkbox"
             label="Required:"
@@ -102,6 +95,11 @@ const Question: React.FC<QuestionProps> = ({ questionIndex, questionId }) => {
           component={<AngleUpM />}
           color="#384350"
           onClick={moveQuestionHandler.bind(null, questionIndex - 1)}
+        />
+        <Icon
+          component={<Remove2M />}
+          color="#384350"
+          onClick={removeQuestionHandler.bind(null, questionId)}
         />
         <Icon
           component={<AngleDownM />}

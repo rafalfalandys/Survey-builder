@@ -10,6 +10,7 @@ const useSurvey = () => {
   const setSurveyData = (questionsData: string) => {
     try {
       const parsedQuestions = JSON.parse(questionsData) as AnyQuestion[];
+      dispatch(surveyActions.setQuestions([]));
       parsedQuestions.forEach((el, i) => {
         dispatch(surveyActions.setQuestionData({ questionIndex: i, questionData: el }));
       });

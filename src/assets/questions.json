@@ -2,7 +2,7 @@
   {
     "question": "What is your favourite day?",
     "required": true,
-    "maxDate": "2024-12-12",
+    "maxDate": "2025-12-12",
     "minDate": "today",
     "type": "date"
   },

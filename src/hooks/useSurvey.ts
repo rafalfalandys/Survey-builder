@@ -12,10 +12,11 @@ const useSurvey = () => {
       const parsedQuestions = JSON.parse(questionsData) as AnyQuestion[];
       dispatch(surveyActions.setQuestions([]));
       parsedQuestions.forEach((el, i) => {
+        console.log(el);
         dispatch(surveyActions.setQuestionData({ questionIndex: i, questionData: el }));
       });
     } catch (error) {
-      console.error("Invalid questionsData", error);
+      console.error("Invalid questionsData.", error);
     }
   };
 

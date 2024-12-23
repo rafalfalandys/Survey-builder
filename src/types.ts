@@ -7,26 +7,27 @@ export type Question = {
 };
 
 export type QuestionRadio = Question & {
-  answers: Answer[];
   type: "single";
+  answers: Answer[];
   shuffleAnswers: boolean;
 };
 
 export type QuestionCheckbox = Question & {
-  answers: Answer[];
   type: "multi";
+  answers: Answer[];
   shuffleAnswers: boolean;
 };
 
 export type QuestionScale = Question & {
-  length: number;
   type: "scale";
+  length: number;
   legend: string[];
 };
 
 export type QuestionOpen = Question & {
-  limit: number;
   type: "open";
+  limit: number;
+  uploadImg: boolean;
 };
 
 export type QuestionImgs = Question & {

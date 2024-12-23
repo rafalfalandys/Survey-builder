@@ -121,6 +121,7 @@
     "question": "What is the one thing we could do to improve your experience?",
     "required": true,
     "type": "open",
-    "limit": 20
+    "limit": 20,
+    "uploadImg": true
   }
 ]

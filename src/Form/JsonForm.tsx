@@ -22,10 +22,15 @@ const JsonForm: React.FC = () => {
   };
 
   const copyJsonHandler = () => {
-    navigator.clipboard.writeText(form.getFieldValue("surveyData")).then(() => {
-      setBtnCopy("Copied!");
-      setTimeout(() => setBtnCopy("Copy Json"), 2000);
-    });
+    try {
+      const formattedData = JSON.stringify(JSON.parse(form.getFieldValue("surveyData")));
+      navigator.clipboard.writeText(formattedData).then(() => {
+        setBtnCopy("Copied!");
+        setTimeout(() => setBtnCopy("Copy Json"), 2000);
+      });
+    } catch (error) {
+      console.error("Invalid JSON format:", error);
+    }
   };
 
   return (
@@ -34,7 +39,7 @@ const JsonForm: React.FC = () => {
       className="survey__form"
       onFinish={setSurveyDataHandler}
       initialValues={{
-        surveyData: JSON.stringify(sampleQuestions, null, 2),
+        surveyData: JSON.stringify(sampleQuestions),
       }}
     >
       <h3>JSON data (updated live):</h3>

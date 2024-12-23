@@ -3,7 +3,7 @@ import { QuestionEmpty } from "./types";
 
 export const getEmptyQuestion: () => QuestionEmpty = () => {
   return {
-    question: "Write you question",
+    question: "Write you question.",
     required: DEFAULT_REQUIRED,
     type: "empty",
     questionId: Math.random(),
